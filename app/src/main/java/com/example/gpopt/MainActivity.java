@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         if (!CheckR()) {
             Op1();
         } else {
-            Op1();
+            Op2();
         }
     }
 
