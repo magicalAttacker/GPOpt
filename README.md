@@ -1,2 +1,2 @@
 # GPOpt
-Game for Pace Graphics Quality Optimization Application
+Game for Peace Graphics Quality Optimization Application
