@@ -3,15 +3,20 @@ package com.example.gpopt;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -61,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void Op1() {
         File file = Environment.getExternalStorageDirectory();
-        String path = file.getPath();
-        file = new File(path + "/Android/data/com.tencent.tmgp.pubgmhd/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Config/Android", "EnjoyCJZC.ini");
+        String path = file.getPath() + "/Android/data/com.tencent.tmgp.pubgmhd/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Config/Android";
+        file = new File(path, "EnjoyCJZC.ini");
         if (file.exists()) {
             boolean ok = file.delete();
             if (!ok) {
@@ -73,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 boolean ok = file.createNewFile();
                 if (!ok) {
-                    Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "文件创建失败", Toast.LENGTH_LONG).show();
                 }
                 FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write("[FansSwitcher]\n" +
@@ -96,7 +101,48 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void Op2() {
-        Toast.makeText(this, "android 11+ 敬请等待适配", Toast.LENGTH_LONG).show();
+        File file = Environment.getExternalStorageDirectory();
+        String path = file.getPath() + "/Android/data/Test";
+        String uriString = fileUriUtils.changeToUri(path);
+        Uri uri = Uri.parse(uriString);
+        if (!fileUriUtils.isGrant(this)) {
+            Grant(uriString);
+        } else {
+            DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri);
+            assert documentFile != null;
+            documentFile.createFile("none", "EnjoyCJZC.ini");
+            Toast.makeText(this, "优化完成", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void Grant(String uriString) {
+        Uri uri = Uri.parse(uriString);
+        Intent intent = new Intent("android.intent.action.OPEN_DOCUMENT_TREE");
+        Toast.makeText(this, uriString, Toast.LENGTH_LONG).show();
+        intent.addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+        }
+        this.startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Uri uri;
+        if (data == null) {
+            return;
+        }
+        if (requestCode == 1 && (uri = data.getData()) != null) {
+            getContentResolver().takePersistableUriPermission(uri, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
+        }
     }
 }
