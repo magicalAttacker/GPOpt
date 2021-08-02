@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
     private final int sdkInt = Build.VERSION.SDK_INT;
@@ -149,9 +150,10 @@ public class MainActivity extends AppCompatActivity {
         if (documentFile1 != null) {
             documentFile1.delete();
         }
-        documentFile.createFile("none", "EnjoyCJZC.ini");
+        DocumentFile file = documentFile.createFile("none", "EnjoyCJZC.ini");
         try {
-            FileOutputStream fileOutputStream = this.openFileOutput("EnjoyCJZC.ini", Context.MODE_APPEND);
+            assert file != null;
+            OutputStream fileOutputStream = getContentResolver().openOutputStream(file.getUri());
             try {
                 fileOutputStream.write(code.getBytes());
                 fileOutputStream.flush();
