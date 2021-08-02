@@ -21,6 +21,8 @@ import androidx.documentfile.provider.DocumentFile;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
     private final int sdkInt = Build.VERSION.SDK_INT;
@@ -74,46 +76,41 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "文件更新失败", Toast.LENGTH_LONG).show();
             }
         }
-        if (!file.exists()) {
-            try {
-                boolean ok = file.createNewFile();
-                if (!ok) {
-                    Toast.makeText(this, "文件创建失败", Toast.LENGTH_LONG).show();
-                }
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write("[FansSwitcher]\n" +
-                        "+CVars=r.PUBGMaxSupportQualityLevel=3\n" +
-                        "+CVars=r.PUBGDeviceFPSLow=6\n" +
-                        "+CVars=r.PUBGDeviceFPSMid=6\n" +
-                        "+CVars=r.PUBGDeviceFPSHigh=6\n" +
-                        "+CVars=r.PUBGDeviceFPSHDR=6\n" +
-                        "+CVars=r.PUBGDeviceFPSDef=6\n" +
-                        "+CVars=r.PUBGDeviceFPSUltralHigh=6\n" +
-                        "+CVars=r.PUBGMSAASupport=4\n" +
-                        "+CVars=r.PUBGLDR=1\n");
-                fileWriter.flush();
-                fileWriter.close();
-                Toast.makeText(this, "优化已完成", Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "权限不足或和平精英未安装并登录", Toast.LENGTH_LONG).show();
+        try {
+            boolean ok = file.createNewFile();
+            if (!ok) {
+                Toast.makeText(this, "文件创建失败", Toast.LENGTH_LONG).show();
             }
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("[FansSwitcher]\n" +
+                    "+CVars=r.PUBGMaxSupportQualityLevel=3\n" +
+                    "+CVars=r.PUBGDeviceFPSLow=6\n" +
+                    "+CVars=r.PUBGDeviceFPSMid=6\n" +
+                    "+CVars=r.PUBGDeviceFPSHigh=6\n" +
+                    "+CVars=r.PUBGDeviceFPSHDR=6\n" +
+                    "+CVars=r.PUBGDeviceFPSDef=6\n" +
+                    "+CVars=r.PUBGDeviceFPSUltralHigh=6\n" +
+                    "+CVars=r.PUBGMSAASupport=4\n" +
+                    "+CVars=r.PUBGLDR=1\n");
+            fileWriter.flush();
+            fileWriter.close();
+            Toast.makeText(this, "优化已完成", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "权限不足或和平精英未安装并登录", Toast.LENGTH_LONG).show();
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void Op2() {
         File file = Environment.getExternalStorageDirectory();
-        String path = file.getPath() + "/Android/data/Test";
+        String path = file.getPath() + "/Android/data";
         String uriString = fileUriUtils.changeToUri(path);
         Uri uri = Uri.parse(uriString);
-        if (!fileUriUtils.isGrant(this)) {
+        if (!fileUriUtils.isGrant(this, fileUriUtils.permissionUri(path))) {
             Grant(uriString);
         } else {
-            DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri);
-            assert documentFile != null;
-            documentFile.createFile("none", "EnjoyCJZC.ini");
-            Toast.makeText(this, "优化完成", Toast.LENGTH_LONG).show();
+            CreateFile(uri);
         }
     }
 
@@ -131,6 +128,17 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
         }
         this.startActivityForResult(intent, 1);
+    }
+
+    public void CreateFile(Uri uri) {
+        DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri);
+        assert documentFile != null;
+        DocumentFile documentFile1 = documentFile.findFile("EnjoyCJZC.ini");
+        if (documentFile1 != null) {
+            documentFile1.delete();
+        }
+        documentFile.createFile("none", "EnjoyCJZC.ini");
+        Toast.makeText(this, "优化完成", Toast.LENGTH_LONG).show();
     }
 
     @Override
