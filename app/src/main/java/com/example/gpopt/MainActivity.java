@@ -1,6 +1,7 @@
 package com.example.gpopt;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -19,10 +20,10 @@ import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
     private final int sdkInt = Build.VERSION.SDK_INT;
@@ -104,10 +105,11 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void Op2() {
         File file = Environment.getExternalStorageDirectory();
-        String path = file.getPath() + "/Android/data";
-        String uriString = fileUriUtils.changeToUri(path);
-        Uri uri = Uri.parse(uriString);
-        if (!fileUriUtils.isGrant(this, fileUriUtils.permissionUri(path))) {
+        String path = file.getPath() + "/Android/data/com.tencent.tmgp.pubgmhd/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Config/Android";
+        String uriString = fileUriUtils.permissionUri(path);
+        String uriCheck = fileUriUtils.grantCheckUri(path);
+        Uri uri = Uri.parse(uriCheck);
+        if (!fileUriUtils.isGrant(this, uriCheck)) {
             Grant(uriString);
         } else {
             CreateFile(uri);
@@ -131,6 +133,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void CreateFile(Uri uri) {
+        String code = "[FansSwitcher]\n" +
+                "+CVars=r.PUBGMaxSupportQualityLevel=3\n" +
+                "+CVars=r.PUBGDeviceFPSLow=6\n" +
+                "+CVars=r.PUBGDeviceFPSMid=6\n" +
+                "+CVars=r.PUBGDeviceFPSHigh=6\n" +
+                "+CVars=r.PUBGDeviceFPSHDR=6\n" +
+                "+CVars=r.PUBGDeviceFPSDef=6\n" +
+                "+CVars=r.PUBGDeviceFPSUltralHigh=6\n" +
+                "+CVars=r.PUBGMSAASupport=4\n" +
+                "+CVars=r.PUBGLDR=1\n";
         DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri);
         assert documentFile != null;
         DocumentFile documentFile1 = documentFile.findFile("EnjoyCJZC.ini");
@@ -138,6 +150,20 @@ public class MainActivity extends AppCompatActivity {
             documentFile1.delete();
         }
         documentFile.createFile("none", "EnjoyCJZC.ini");
+        try {
+            FileOutputStream fileOutputStream = this.openFileOutput("EnjoyCJZC.ini", Context.MODE_APPEND);
+            try {
+                fileOutputStream.write(code.getBytes());
+                fileOutputStream.flush();
+                fileOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+        }
         Toast.makeText(this, "优化完成", Toast.LENGTH_LONG).show();
     }
 
