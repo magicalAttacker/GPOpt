@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends AppCompatActivity {
     private final int sdkInt = Build.VERSION.SDK_INT;
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             assert file != null;
             OutputStream fileOutputStream = getContentResolver().openOutputStream(file.getUri());
             try {
-                fileOutputStream.write(code.getBytes());
+                fileOutputStream.write(code.getBytes(StandardCharsets.UTF_8));
                 fileOutputStream.flush();
                 fileOutputStream.close();
             } catch (IOException e) {
