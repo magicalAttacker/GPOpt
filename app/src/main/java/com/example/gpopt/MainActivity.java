@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = Uri.parse(uriCheck);
         if (!fileUriUtils.isGrant(this, uriCheck)) {
             Grant(uriString);
+            Toast.makeText(this, "授权完成后，请再次按下按钮以完成优化", Toast.LENGTH_LONG).show();
         } else {
             CreateFile(uri);
         }
@@ -123,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
     public void Grant(String uriString) {
         Uri uri = Uri.parse(uriString);
         Intent intent = new Intent("android.intent.action.OPEN_DOCUMENT_TREE");
-        Toast.makeText(this, uriString, Toast.LENGTH_LONG).show();
         intent.addFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
